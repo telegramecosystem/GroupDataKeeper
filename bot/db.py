@@ -37,6 +37,14 @@ async def set_value_in_db(connection, group_id, key, value):
     )
 
 
+async def remove_value_from_db(connection, group_id, key):
+    logger.info(f"Removing value from DB for group_id: {group_id}, key: {key}")
+    await connection.execute(
+        "DELETE FROM group_info WHERE group_id = ? AND key = ?",
+        (group_id, key),
+    )
+
+
 async def get_value_from_db(connection, group_id, key):
     cursor = await connection.execute(
         "SELECT value FROM group_info WHERE group_id = ? AND key = ?",

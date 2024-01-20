@@ -1,7 +1,7 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatMember
 from telegram.ext import CallbackContext, ContextTypes, CommandHandler
 from cachetools import TTLCache, cached
-from db import get_connection, set_value_in_db, get_value_from_db
+from db import get_connection, set_value_in_db, get_value_from_db, remove_value_from_db
 import logging
 
 # Konfiguracja logowania
@@ -85,6 +85,27 @@ async def set_value(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 def sanitize_value(value):
     sanitized_value = value.replace(";", "").replace("--", "")
     return sanitized_value[:100]
+
+
+async def remove_value(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not context.args:
+        await update.message.reply_text("Usage: /remove <key>")
+        return
+
+    key = context.args[0]
+
+    try:
+        conn = await get_connection()
+        await remove_value_from_db(conn, update.effective_chat.id, key)
+        await conn.commit()
+        await update.message.reply_text(f"Value removed for {key}")
+
+        # Po usunięciu wartości, czyścimy pamięć podręczną
+        cache.clear()
+    except Exception as e:
+        await update.message.reply_text(f"Error occurred: {e}")
+    finally:
+        await conn.close()
 
 
 # Używamy dekoratora cached z zadeklarowanym cache
