@@ -15,7 +15,7 @@ def main():
     logger.info("Starting bot")
     app = (
         ApplicationBuilder()
-        .token("6644951933:AAGtdD7f1pLUzXAziDgNRwZKGo9YXuYPAUI")
+        .token("")
         .build()
     )
 
